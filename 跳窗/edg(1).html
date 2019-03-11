@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<style type="text/css">
+	li{list-style-type: none;}
+	.form1 .xuanxiang{width: 300px;color:navy}
+	#table h2{margin: 0px;font-size: 16px;background: navy;color: #fff}
+	.form1 #lpl{float: left;margin: 10px}
+	#table{background: pink;width:0px;height:350px;border: 1px solid #000;overflow: hidden;position: absolute;}
+	.form1 .downbtn{float: right;margin: 10px}
+</style>
+<head>
+	<meta charset="UTF-8">
+	<title>表单</title>
+</head>
+<body>
+	<div class="btn">
+		<input type="button" id="btn"  value="点我">
+		
+	</div>
+
+	<div class="form1" id="table">
+		<h2 id="dragBar">填写信息</h2>
+		<form action="" class="text1">
+				
+				<li id="lpl"><input type="checkbox" name="edg">EDG </li>
+				<li id="lpl"><input type="checkbox" name="rw">RW</li>
+				<li id="lpl"><input type="checkbox" name="rng">RNG</li>
+				<li id="lpl"><input type="checkbox" name="ig">IG</li>
+				<li id="lpl"><input type="checkbox" name="edg">EDG </li>
+				<li id="lpl"><input type="checkbox" name="rw">RW</li>
+				<li id="lpl"><input type="checkbox" name="rng">RNG</li>
+				<li id="lpl"><input type="checkbox" name="ig">IG</li>
+				<li id="lpl"><input type="checkbox" name="edg">EDG </li>
+				<li id="lpl"><input type="checkbox" name="rw">RW</li>
+				<li id="lpl"><input type="checkbox" name="rng">RNG</li>
+				<li id="lpl"><input type="checkbox" name="ig">IG</li>
+				<li id="lpl"><input type="checkbox" name="edg">EDG </li>
+				<li id="lpl"><input type="checkbox" name="rw">RW</li>
+				<li id="lpl"><input type="checkbox" name="rng">RNG</li>
+				<li id="lpl"><input type="checkbox" name="ig">IG</li>
+
+			<div>
+				<input type ="button" class="downbtn" id ="shut" value="关闭">							
+				<input type ="reset" class="downbtn" value="重置">
+				<input type ="submit" class="downbtn" value="确定">
+			</div>				
+		</form>
+	</div>
+</body>
+</html>
+
+<script type="text/javascript">
+	function $(id){
+		return document.getElementById(id);
+	}
+
+	var obtn = $("btn")
+	var otable = $("table")
+	var oshut = $("shut")
+	otable.style.opacity = 0
+	obtn.onclick = function(event){
+
+		move(otable,300,250,"width")
+		otable.style.opacity = 100
+		
+	}
+	oshut.onclick = function(event){
+		move(otable,0,0,"width")
+		otable.style.border = "none"
+
+	}
+	var box = $("table")
+	var dragBar = $("dragBar")
+
+	 dragBar.onmousedown = function(ev) {
+    var oEvent = ev || event;
+    var x = oEvent.clientX - box.offsetLeft;
+    var y = oEvent.clientY - box.offsetTop;
+     
+    document.onmousemove = function(ev){
+        var oEvent = ev || event;      
+        var l = oEvent.clientX - x;
+        var t = oEvent.clientY - y;
+        if(l < 0) {
+            l = 0;
+
+        } else if(l > document.documentElement.clientWidth - box.offsetWidth) {
+            l = document.documentElement.clientWidth - box.offsetWidth;
+        }
+        if(t < 0) {
+            t = 0;
+        } else if(t > document.documentElement.clientHeight - box.offsetHeight) {
+            t = document.documentElement.clientHeight - box.offsetHeight;
+        }
+        box.style.left = l + "px";
+        box.style.top = t + "px";
+    }
+    //鼠标抬起的函数
+    document.onmouseup = function() {
+        document.onmousemove = null;
+        document.onmouseup = null;
+    }
+    //火狐浏览器在拖拽空div时会出现bug
+    //return false阻止默认事件，解决火狐的bug
+    return false;
+}
+
+function move(DOM,target1,target2,attr){
+
+
+		clearInterval(DOM.timer);
+		DOM.timer = setInterval(function(){
+
+			var iNow = parseInt(getStyle(DOM,attr)); 
+			var iNow2 = parseInt(getStyle(DOM,"height"));
+ 
+			var speed = (target1 - iNow) / 10;
+			var speed2 = (target2 - iNow2) / 10;
+
+			speed = speed > 0 ? Math.ceil(speed) : Math.floor(speed);
+
+			if(iNow == target1){
+
+				clearInterval(timer);
+
+			}else{
+				DOM.style[attr] = iNow + speed + "px";
+				DOM.style.height = iNow2 +speed2 +"px"
+			}
+		}, 30);
+
+	}
+
+
+
+	function getStyle(DOM,attr){
+
+		if(getComputedStyle){
+			return getComputedStyle(DOM,false)[attr];
+		}else{
+			return DOM.currentStyle[attr];
+		}
+
+	}
+</script>

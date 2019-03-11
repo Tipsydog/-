@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>窗口类 </title>
+    <meta charset="UTF-8">
+
+    <style type="text/css" >
+
+
+        .mask{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            filter: alpha(opacity=50);
+            -moz-opacity:0.5;
+            opacity:0.5;
+            background-color: #ffffff;
+            z-index: 2;
+            display: none;}
+        /* 标题栏*/
+        div.sample_popup {
+            height:700px; border: 1px solid #327eca; width: 955px;
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translateX(-250px) translateY(50px);}
+
+        div.sample_popup div.menu_form_header
+        {
+            border-bottom: 0px;
+            cursor: default;
+            width:100%;
+            height: 455px;			/*边框的高度*/
+            line-height: 22px;
+            letter-spacing:5px;		/*最上一行字间距*/
+            vertical-align: middle;
+            text-decoration: none;
+            font-family: "Times New Roman", Serif;
+            font-weight:bold;	/*"请选择对比算法"的字体粗细*/
+            font-size: 15px;		/*"请选择对比算法"的字体大小*/
+            color: #0a2e81;		/*"请选择对比算法"的颜色*/
+        }
+        div.menu_form_body
+        {
+            top:25px;
+            position: absolute;
+            width:100%;
+            height:420px;
+            font-size:12px;
+            background-color:#f1f8fe;
+        }
+        div.sample_popup input.menu_form_exit
+        {
+            float: right;
+            margin: 4px 5px 0px 0px;
+            cursor: pointer;
+        }
+
+        table tr{
+            height:      30px;       /*把table标签的行高设定为固定值, 高度根据自己需求设定*/
+            overflow:   hidden;  /*超过隐藏*/
+
+        }
+        /*end: 弹出商品信息div */
+    </style>
+
+    <style>
+        *{margin:0;}
+        label{vertical-align:bottom;}
+        .inputcheckbox{vertical-align:middle;}
+        body{font-family:tahoma;font-size:12px;}
+    </style>
+
+    <style type="text/css">
+        input.text{
+            font-size: 15px;
+            height: 40px;
+            width: 40px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        /**************************************************
+         * DivWindow.js
+         **************************************************/
+        var DivWindow= function(popup/*最外层div id*/,popup_drag/*拖动div id*/,popup_exit/*退出按钮id*/ ,exitButton/*按钮id*/,varwidth,varheight,zindex){
+
+            this.popup =popup ;    //窗口名称
+
+            this.height =varheight ; //窗口高度，并没用来设置窗口高度宽度，用来定位在屏幕的位置
+            this.width =varwidth ;    //窗口宽度
+            this.popup_exit=popup_exit;
+            this.exitButton=exitButton;
+            this.zindex=zindex;
+            this.init = function(){    //初始化窗口
+
+                this.popupShow();
+                this.startDrag();    //设置拖动
+                this.setCommond();    //设置关闭
+                DivWindow.ArrayW.push(document.getElementById(this.popup));    //存储窗口到数组
+
+            };this.init();
+        };
+        //存储窗口到数组
+        DivWindow.ArrayW = new Array();
+        //字符串连接类
+        DivWindow.StringBuild = function(){
+            this.arr = new Array();
+            this.push = function(str){
+                this.arr.push(str);
+            };
+            this.toString = function(){
+                return this.arr.join("");
+            };
+        };
+        //拖动类
+        DivWindow.Drag = function(o ,oRoot){
+            var _self = this;
+            //拖动对象
+            this.obj = (typeof oRoot != "undefined") ?oRoot : o;
+            this.relLeft = 0;    //记录横坐标
+            this.relTop = 0;    //记录纵坐标
+            o.onselectstart = function(){
+                return false;
+            };
+            o.onmousedown = function(e){    //鼠标按下
+                e = _self.fixE(e);
+                _self.relLeft = e.clientX - _self.fixU(_self.obj.style.left);
+                _self.relTop = e.clientY - _self.fixU(_self.obj.style.top);
+                document.onmousemove = function(e){
+                    _self.drag(e);
+                };
+                document.onmouseup     = function(){
+                    _self.end();
+                };
+            };
+            this.drag = function(e){    //拖动
+                e = this.fixE(e);
+                var l = e.clientX - this.relLeft;
+                var t = e.clientY - this.relTop;
+                if (t < 0)
+                {
+                    t = 0;    //防止头部消失
+                }
+                this.obj.style.left = l +"px";
+                this.obj.style.top = t +"px";
+            };
+            this.end = function(){    //结束拖动
+                document.onmousemove = null;
+                document.onmouseup = null;
+            };
+            this.fixE = function(e){    //修复事件
+                if (typeof e == "undefined") e = window.event;
+                return e;
+            };
+            this.fixU = function(u){    //处理px单位
+                return parseInt(u.split("p")[0]);
+            };
+        };
+
+        //窗口拖动
+        DivWindow.prototype.startDrag = function(){
+            var obj = document.getElementById(this.popup);
+            new DivWindow.Drag(obj.childNodes[0] ,obj);
+        };
+
+        //设定窗口优先级
+        DivWindow.prototype.setTop = function(){
+            document.getElementById(this.popup).onclick =
+                document.getElementById(this.popup).onmousedown =
+                    function(){
+                        for(var i=0;i<DivWindow.ArrayW.length;i++)
+                        {
+                            DivWindow.ArrayW[i].style.zIndex = 1;
+                        }
+                        this.style.zIndex = 100;
+                    };
+        };
+        //显示
+        DivWindow.prototype.popupShow=function()
+        { document.all.mask.style.display="block";
+            document.all.mask.style.width=window.screen.width +20;
+            document.all.mask.style.height=window.screen.width +20;
+            var element = document.getElementById(this.popup);
+            element.style.position = "absolute";
+            element.style.visibility = "visible";
+            element.style.display = "block";
+            element.style.width=this.width;
+            element.style.height='auto';
+            element.style.left = (window.screen.width - this.width)/2+"px";
+            element.style.top =20+"px";
+            element.style.zIndex=this.zindex;
+        }
+        //设置关闭
+        DivWindow.prototype.setCommond = function(){
+            var _self = this;
+            //根对象
+            var obj = document.getElementById(this.popup);
+            var exit = document.getElementById(this.popup_exit);
+            var triggServerEvent=document.getElementById(this.exitButton);
+            //设置关闭
+            exit.onclick = function(){
+                obj.style.display = "none";
+                obj.style.visibility = 'hidden';
+                document.all.mask.style.display='none'//关闭遮罩层
+                triggServerEvent.click();//触发服务器端退出事件
+            };
+        };
+
+    </script>
+
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function(){
+            /*全选
+            全选cheched和下方的checkbox按钮的checked是一致的，
+            故可用this.checked。
+            注意：$(this).checked是错的
+            */
+            $('#checkedAll').click(function() {
+                $('[name=algorithm]:checkbox').prop('checked', this.checked);
+            });
+
+            //反选
+            $('#reversecheck').click(function(){
+                $('[name=algorithm]:checkbox').each(function () {
+                    $(this).prop("checked",!$(this).prop("checked"));
+                });
+
+            });
+
+            /*判断复选框的总数，是否和选中的复选框的数量相等
+            相等：全选了
+            不相等：没有全选
+            */
+            $('[name=algorithm]:checkbox').click(function() {
+                /*得到的是ul下 name=item 的复选框数组*/
+                var $checkedArray = $('[name=algorithm]:checkbox');
+                /*$checkedArray.filter(':checked') -----> 已经选择的复选框 */
+                $('#checkedAll').prop('checked',$checkedArray.length==$checkedArray.filter(':checked').length);
+
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            //获取已选的复选框的值
+            var checkedArray = new Array();//放已经选择的checkbox的value
+            var count;//已经选择的个数
+            $('#btn_submit').click(function() {
+                checkedArray.length=0;
+                count=0;
+                $('[name=item]:checkbox:checked').each(function() {
+                    checkedArray.push($(this).val());
+                    count++;
+                });
+                if (checkedArray.length==0) {
+                    alert("Please check one at least.");
+                    return;
+                }
+                confirm("已选复选框的值："+checkedArray+"\n"+"选中的复选框个数："+count);
+            });
+        })
+    </script>
+
+
+</head>
+<body>
+<div>
+    <input type="button" id="show"
+           onclick="javascript:new DivWindow('popup','popup_drag','popup_exit','exitButton','500','700',4);"
+           value='处理' />
+
+</div>
+<!-- 遮罩层 -->
+<div id="mask" class="mask">
+</div>
+<!-- 弹出层 -->
+<div class="sample_popup" id="popup" style="visibility: hidden; display:none;" ><!--最上最下居中-->
+    <div class="menu_form_header" id="popup_drag" align="center">
+
+        请选择要对比的算法
+    </div>
+
+    <!--选择区域-->
+    <div class="menu_form_body" align="middle">
+
+
+
+        <table  style="text-align:left" width="1000" align="center">
+            <form action="/example/html5/demo_form.asp" method="get">
+                <tr>
+
+                    <th><input type="checkbox" name="algorithm" value="Haar" />&nbsp;Haar</th>
+                    <th><input type="checkbox" name="algorithm" value="HO" />&nbsp;Haar orthogonal</th>
+                    <th><input type="checkbox" name="algorithm" value="D1" />&nbsp;Daubechies1</th>
+                    <th><input type="checkbox" name="algorithm" value="D2" />&nbsp;Daubechies2</th>
+                    <th><input type="checkbox" name="algorithm" value="D3" />&nbsp;Daubechies3</th>
+                    <th><input type="checkbox" name="algorithm" value="D4" />&nbsp;Daubechies4</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="D5" />&nbsp;Daubechies5</th>
+                    <th><input type="checkbox" name="algorithm" value="D6" />&nbsp;Daubechies6</th>
+                    <th><input type="checkbox" name="algorithm" value="D7" />&nbsp;Daubechies7</th>
+                    <th><input type="checkbox" name="algorithm" value="D8" />&nbsp;Daubechies8</th>
+                    <th><input type="checkbox" name="algorithm" value="D9" />&nbsp;Daubechies9</th>
+                    <th><input type="checkbox" name="algorithm" value="D10" />&nbsp;Daubechies10</th>
+                </tr>
+
+                <tr><th><input type="checkbox" name="algorithm" value="D11" />&nbsp;Daubechies11</th>
+                    <th><input type="checkbox" name="algorithm" value="D12" />&nbsp;Daubechies12</th>
+                    <th><input type="checkbox" name="algorithm" value="D13" />&nbsp;Daubechies13</th>
+                    <th><input type="checkbox" name="algorithm" value="D14" />&nbsp;Daubechies14</th>
+                    <th><input type="checkbox" name="algorithm" value="D15" />&nbsp;Daubechies15</th>
+                    <th><input type="checkbox" name="algorithm" value="D16" />&nbsp;Daubechies16</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="D17" />&nbsp;Daubechies17</th>
+                    <th><input type="checkbox" name="algorithm" value="D18" />&nbsp;Daubechies18</th>
+                    <th><input type="checkbox" name="algorithm" value="D19" />&nbsp;Daubechies19</th>
+                    <th><input type="checkbox" name="algorithm" value="D20" />&nbsp;Daubechies20</th>
+                    <th><input type="checkbox" name="algorithm" value="Coiflet1" />&nbsp;Coiflet1</th>
+                    <th><input type="checkbox" name="algorithm" value="Coiflet2" />&nbsp;Coiflet2</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="Coiflet3" />&nbsp;Coiflet3</th>
+                    <th><input type="checkbox" name="algorithm" value="Coiflet4" />&nbsp;Coiflet4</th>
+                    <th><input type="checkbox" name="algorithm" value="Coiflet5" />&nbsp;Coiflet5</th>
+                    <th><input type="checkbox" name="algorithm" value="Legendre1" />&nbsp;Legendre1</th>
+                    <th><input type="checkbox" name="algorithm" value="Legendre2" />&nbsp;Legendre2</th>
+                    <th><input type="checkbox" name="algorithm" value="Legendre3" />&nbsp;Legendre3</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="Symlet1" />&nbsp;Symlet1</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet2" />&nbsp;Symlet2</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet3" />&nbsp;Symlet3</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet4" />&nbsp;Symlet4</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet5" />&nbsp;Symlet5</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet6" />&nbsp;Symlet6</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="Symlet7" />&nbsp;Symlet7</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet8" />&nbsp;Symlet8</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet9" />&nbsp;Symlet9</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet10" />&nbsp;Symlet10</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet11" />&nbsp;Symlet11</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet12" />&nbsp;Symlet12</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="Symlet13" />&nbsp;Symlet13</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet14" />&nbsp;Symlet14</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet15" />&nbsp;Symlet15</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet16" />&nbsp;Symlet16</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet17" />&nbsp;Symlet17</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet18" />&nbsp;Symlet18</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="Symlet19" />&nbsp;Symlet19</th>
+                    <th><input type="checkbox" name="algorithm" value="Symlet20" />&nbsp;Symlet20</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal1/1" />&nbsp;BiOrthogonal1/1</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal2/3" />&nbsp;BiOrthogonal2/3</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal1/5" />&nbsp;BiOrthogonal1/5</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal2/2" />&nbsp;BiOrthogonal2/2</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal2/4" />&nbsp;BiOrthogonal2/4</th>
+                    <th><input type="checkbox" name="algorithm" value="iOrthogonal2/6" />&nbsp;BiOrthogonal2/6</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal2/8" />&nbsp;BiOrthogonal2/8</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal3/1" />&nbsp;BiOrthogonal3/1</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal3/3" />&nbsp;BiOrthogonal3/3</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal3/5" />&nbsp;BiOrthogonal3/5</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal3/7" />&nbsp;BiOrthogonal3/7</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal3/9" />&nbsp;BiOrthogonal3/9</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal4/4" />&nbsp;BiOrthogonal4/4</th>
+                    <th><input type="checkbox" name="algorithm" value="BiOrthogonal5/5" />&nbsp;BiOrthogonal5/5</th>
+                    <th><input type="checkbox" name="algorithm" value="DiscreteMayer" />&nbsp;Discrete Mayer</th>
+                    <th><input type="checkbox" name="algorithm" value="Battle23" />&nbsp;Battle23</th></tr>
+                <tr>
+                    <th><input type="checkbox" name="algorithm" value="CDF5/3" />&nbsp;CDF5/3</th>
+                    <th><input type="checkbox" name="algorithm" value="CDF9/7" />&nbsp;CDF9/7</th></tr>
+
+        </table>
+
+
+        <input type="checkbox" id="checkedAll" ><label for="checkedAll">&nbsp;全选</label>
+        <input type="checkbox" id="reversecheck"><label for="reversecheck">&nbsp;反选</label></form>
+</div>
+
+    <div align="right">
+        <input type="submit" value="提交" align="right" />
+        <input type="button" id="popup_exit" value="取消"  style='font-size:15px' style="width:40px;height:60px;"/>
+
+
+</div>
+
+
+</div>
+</div>
+
+
+</body>
+</html>
+

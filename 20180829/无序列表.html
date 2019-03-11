@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="js/echarts.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+	    
+	    
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: 'ECharts 示例'
+            },
+            tooltip: {},
+            legend: {
+                data:['销量']
+            },
+            xAxis: {
+                data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+            },
+            yAxis: {},
+            series: [{
+                name: '销量',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20]
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+        
+//      //下面是需要添加的方法内容
+//      //点击柱状图跳转相应页面的功能，其中param.name参数为横坐标的值 
+//  			var ecConfig = require('echarts/config');
+//          function eConsol	e (param) {
+//              if (typeof param.seriesIndex != 'undefined') {
+//                  switch (param.name) {
+//                      case "衬衫":    
+//                          window.location.href = "http://www.sina.com";
+//                          window.open("http://www.sina.com", "_blank");	//在新页面打开
+//                          break;
+//                      case "羊毛衫":  
+//                          window.location.href = "http://www.baidu.com";
+//                          break;
+//                      case "雪纺衫":  
+//                          window.location.href = "http://www.qq.com";
+//                      case "裤子":  
+//                          window.location.href = "http://www.qq.com";
+//                      case "高跟鞋":  
+//                          window.location.href = "http://www.qq.com";
+//                      case "袜子":  
+//                          window.location.href = "http://www.qq.com";
+//                          break;
+//                      default:
+//                          break;
+//                  }
+//              }
+//          }
+//          myChart.on(ecConfig.EVENT.CLICK, eConsole);
+    		   
+    		   //echarts图表点击跳转
+               	myChart.on('click', function (param){
+                   	var name=param.name;
+                   	if(name=="衬衫"){
+                   		window.location.href="http://www.sina.com";
+                   	}else if(name=="羊毛衫"){
+                   		window.location.href="${base}/admin/classify/list.htm";
+                   	}else if(name=="雪纺衫"){
+                   		window.location.href="${base}/admin/news/list.htm";
+                    }else{
+                    	window.location.href="${base}/admin/file/list.htm";
+                    }                   	
+       			});
+               	myChart.on('click',eConsole);
+    		   
+
+
+    </script>
+
+</body>
+</html>
